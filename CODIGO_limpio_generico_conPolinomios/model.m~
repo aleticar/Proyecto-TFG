@@ -1,0 +1,20 @@
+function f=model(X,Y,orden)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[dim1,dim2]=size(X);
+
+Xaux=X;
+X=[ones(dim1,1)];
+for i=1:orden
+    i
+    size(X)
+    
+ X=[X X.^i];
+ dis
+end
+%a=inv(X'*X)*X'*Y;
+size(X)
+pause
+a=X\Y;
+f=X*a;

@@ -1,0 +1,98 @@
+: clear all
+close all
+clc
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% Removing-Backward minimizing error
+%%%% quito una variable y veo que error obtengo, 
+%%%% haciendo regresion con la variables que quedan ...
+%%%% si me da cambio minimo de error esta variable es mala.
+%%%% La guardo como mala, y sigo otra vez con las que me quedan
+%%%% La primera variable que quitamos serà la peor
+%%%% La ultima variable que queda serà la mejor
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ load X
+ X=dataX;
+%%%%%%%%%%%%%%%
+  load Y 
+  Y=dataY;
+   %%%%%%%%%%%% %%%%%%  
+  Y=Y-mean(Y); %%%% IMPORTANTE  O CAMBIAR V(0)
+  %%%%%% %%%%%% %%%%%% %%%%%% 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+ chosen_output=1; %%%  1 or 2 %%% OUTPUT
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+    [dim1,dim2]=size(X);
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+ %%%%%%%%%%%% %%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%
+   pos_antes=1:dim2; %%% all possible positions of variables
+   todo_all_possible=1:dim2; %%% all possible positions of variables
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   for i=1:dim2
+          %%%%%%%%%%%%%%%%%%%%%%%%%%% 
+       if mod(i,10)==0
+         disp([num2str(i/dim2*100),'%'])
+       end
+       %%%%%%%%%%%%%%%%%%%%%%%%%%% 
+ %%%%% %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%      
+     for j=1:length(todo_all_possible)
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+         pos_antesaux=pos_antes;
+         pos_antesaux(j)=[];
+         pos=pos_antesaux; 
+        Xnow=X(:,pos);
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+         orden_poli=10;
+         warning off
+         f=model(Xnow,Y(:,chosen_output),orden_poli);
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+         alpha=1;
+         error_par_aux(j)=mean(abs(Y(:,chosen_output)-f).^alpha);
+     end
+ %%%%% %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%% 
+    error_par(dim2-i+1)=min(error_par_aux);
+   pos_err_min=find(error_par_aux==min(error_par_aux)); 
+ %%%% %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%  %%%%%     
+    nowotropos=find(pos_antes==todo_all_possible(pos_err_min));
+    pos_antes(nowotropos)=[];
+    pos_fin(dim2-i+1)=todo_all_possible(pos_err_min);
+    todo_all_possible(pos_err_min)=[];
+    clear  error_par_aux  
+   end
+  %%%%% %%%%%  %%%%%  %%%%%  %%%%%  
+  %%%%pos_fin(1)=todo_all_possible;%%% now todo_all_possible has just one element
+ 
+  disp('------------------------------------')
+  %%%disp('Solution / RANKING:') 
+  disp(['Solution / RANKING: (orden poli = ',num2str(orden_poli),')']) 
+  
+      SOL=pos_fin   
+   
+   %%% %recomputing erro_par (called now erro_par2) to do properly and just to check   
+    for j=1:dim2          
+         Xnow=X(:,SOL(1:j)); 
+         f=model(Xnow,Y(:,chosen_output),orden_poli);
+         error_par2(j)=mean(abs(Y(:,chosen_output)-f).^alpha);
+      end  
+  
+  figure
+   plot(error_par2,'o-')
+    hold on
+    plot(error_par(2:end),'mo--')
+  %%%%%%%%%%%  
+    figure
+    V=[mean(abs(Y(:,chosen_output)).^alpha) error_par2];
+    plot(0:dim2,V,'o-')
+
+   disp('------------------------------------------------')
+   disp(['Recall chosen_output = ',num2str(chosen_output),' and alpha = ',num2str(alpha)])
+   disp('------------------------------------------------')
+   
+  %stem(V(1:end-1)-V(2:end))
+  d1=V(1:end-1)-V(2:end);
+  posder1=find(d1<0);
+  length(posder1)
+  d2=d1(1:end-1)-d1(2:end);
+  posder2=find(d2<0);
+  length(posder2)
